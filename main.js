@@ -118,4 +118,7 @@ const http = createServer(app);
 
 http.listen(4001, () => { console.log(`Server listening on 4001`); });
 
-app.get('/up-check', (_req, res) => { res.status(200).end(); });
+app.get('/up-check', (_req, res) => {
+    console.log("check-up 🙂");
+    res.status(200).end();
+});
