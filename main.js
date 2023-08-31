@@ -1,6 +1,8 @@
 import * as dotenv from 'dotenv';
 import { Client, GatewayIntentBits } from 'discord.js';
 import fs from 'fs';
+import express from 'express';
+import { createServer } from 'http';
 
 dotenv.config();
 
@@ -27,7 +29,9 @@ client.once('ready', async () => {
 
     // remove and switch to database
     // hyland server channels
+    // eslint-disable-next-line no-undef
     countChan = await client.channels.fetch(process.env.ENV_COUNTING_CHANNEL);
+        // eslint-disable-next-line no-undef
     countDisc = await client.channels.fetch(process.env.ENV_MESSAGE_CHANNEL);
 
     const lastMessageCollection = await countChan.messages.fetch({
@@ -108,3 +112,10 @@ function transformHeader(msg) {
 
 // eslint-disable-next-line no-undef
 client.login(process.env.ENV_BOT_TOKEN);
+
+const app = express();
+const http = createServer(app);
+
+http.listen(4001, () => { console.log(`Server listening on 4001`); });
+
+app.get('/up-check', (_req, res) => { res.status(200).end(); });
