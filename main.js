@@ -20,34 +20,30 @@ const resMessagesObj = JSON.parse(resMessagesFile);
 const resHeader = (resMessagesObj.header).join(' ');
 const resMessages = resMessagesObj.content;
 
-let lastMessage = null;
-let countChan = null;
-let countDisc = null;
-
 client.once('ready', async () => {
     console.log('Ready!');
+});
 
-    // remove and switch to database
+client.on("messageCreate", async msg => {
+        // remove and switch to database
     // hyland server channels
     // eslint-disable-next-line no-undef
-    countChan = await client.channels.fetch(process.env.ENV_COUNTING_CHANNEL);
+    const countChan = await client.channels.fetch(process.env.ENV_COUNTING_CHANNEL);
         // eslint-disable-next-line no-undef
-    countDisc = await client.channels.fetch(process.env.ENV_MESSAGE_CHANNEL);
-
+    const countDisc = await client.channels.fetch(process.env.ENV_MESSAGE_CHANNEL);
     const lastMessageCollection = await countChan.messages.fetch({
-        limit: 1
+        limit: 1,
+        before: msg.id
     });
     // Hacky way to enforce starting from a blank channel:
     // If there's no messages, make a fake message with a 0 value
-    lastMessage = lastMessageCollection.first() || {
+    const lastMessage = lastMessageCollection.first() || {
         content: '0',
         author: {
             username: 'Nobody',
         },
     };
-});
 
-client.on("messageCreate", async msg => {
     if (msg.author.bot) return;
     if (msg.channelId == countChan.id) {
         if (!Number.isInteger(parseInt(msg.content))) { // Doesn't parse to integer
@@ -90,13 +86,14 @@ client.on("messageCreate", async msg => {
                 return;
             }
 
-            lastMessage = msg;
             msg.react('👍');
         }
     }
 });
 
-client.on('messageUpdate', (oldMessage, newMessage) => {
+client.on('messageUpdate', async (oldMessage, newMessage) => {
+    // eslint-disable-next-line no-undef
+    const countChan = await client.channels.fetch(process.env.ENV_COUNTING_CHANNEL);
     if (newMessage.channelId == countChan.id) {
         if (newMessage.content != oldMessage.content) {
             newMessage.content = oldMessage.content; // for example
@@ -116,7 +113,7 @@ client.login(process.env.ENV_BOT_TOKEN);
 const app = express();
 const http = createServer(app);
 
-http.listen(4001, () => { console.log(`Server listening on 4001`); });
+http.listen(4000, () => { console.log(`Server listening on 4000`); });
 
 app.get('/up-check', (_req, res) => {
     console.log("check-up 🙂");
